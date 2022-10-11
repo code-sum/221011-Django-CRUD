@@ -69,6 +69,9 @@
 
 
 - 사전 설정 (조금 더 자세히)
+  - 가상환경 및 Django 설치, 프로젝트 생성 및 추가 설정 👉 [(link)](https://github.com/code-sum/TIL/blob/master/notes/dj_modelform2.md) 
+  - 
+
 
 
 
@@ -105,5 +108,4 @@ User Model 바탕으로 CRUD
 1. 회원가입 기능 구현
 
 2. User 모델 변경하기(11:35 ~)
-
 
