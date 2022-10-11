@@ -4,13 +4,20 @@ from django.contrib.auth import get_user_model
 
 # Create your views here.
 
+def index(request):
+    users = get_user_model().objects.all()
+    context = {
+        "users": users,
+    }
+    return render(request, "accounts/index.html", context)
+
 def signup(request):
     # POST 요청 처리
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('articles:index')
+            return redirect('accounts:index')
     else:     
         form = CustomUserCreationForm()
     context = {
@@ -20,7 +27,7 @@ def signup(request):
 
 def detail(request, pk):
     # user 정보 받아오기
-    user = User.objects.get(pk=pk)
+    user = get_user_model().objects.get(pk=pk)
     context = {
         'user': user
     }

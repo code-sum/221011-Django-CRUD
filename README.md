@@ -304,7 +304,7 @@
            form = UserCreationForm(request.POST)
            if form.is_valid():
                form.save()
-               return redirect('articles:index')
+               return redirect('accounts:index')
        else:     
            form = UserCreationForm()
        context = {
@@ -329,6 +329,12 @@
        class Meta:
            model = get_user_model()
            fields = ('username', 'password1', 'password2', 'email')
+           labels = {
+         'username': '닉네임',
+         'password1': '비밀번호',
+         'password2': '비밀번호 확인',
+         'email' : '이메일'
+       }
    ```
 
    1-6. VIEW 에 CustomUserCreationForm 반영하기
@@ -374,18 +380,57 @@
    2-1. URL
 
    ```python
+   # accounts/urls.py
+   # 추가된 코드: path('', views.index, name="index"),
    
+   from django.urls import path
+   from . import views
+   
+   app_name = 'accounts'
+   urlpatterns = [
+       path('', views.index, name="index"),
+       path('signup/', views.signup, name='signup'),
+       path('<int:pk>/', views.detail, name='detail'),
+   ]
    ```
 
    2-2. VIEW
 
    ```python
+   # accounts/views.py 에 index 함수 추가
    
+   def index(request):
+       users = get_user_model().objects.all()
+       context = {
+           "users": users,
+       }
+       return render(request, "accounts/index.html", context)
    ```
 
    2-3. TEMPLATE
 
    ```django
+   <!-- accounts/templates/accounts/index.html 생성,
+       아래와 같이 내용 채우기 -->
+   
+   {% extends 'base.html' %}
+   {% load django_bootstrap5 %}
+   
+   {% block content %}
+     <div class="form">
+       <h1>회원 목록</h1>
+       <div class="row justify-content-center">
+         {% for user in users %}
+           <div>
+             <a href="{% url 'accounts:detail' user.pk %}">
+               {{ user.username }}
+             </a>
+           </div>
+         {% endfor %}
+       </div>
+       <a href="{% url 'index' %}">돌아가기</a>
+     </div>
+   {% endblock content %}
    ```
 
    
