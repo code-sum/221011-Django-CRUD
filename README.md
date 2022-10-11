@@ -194,19 +194,100 @@
 
 > 2. 에서 만든 User Model 바탕으로 CRUD 기능 구현하기
 >
-> - 회원정보 생성 : CREATE
+> - 회원 가입 : CREATE
 > - 회원정보 확인 : READ
 > - 회원정보 프로필보기 : 상세보기(READ detail page) 
 > - 회원정보 수정 : UPDATE
-> - 회원정보 삭제 : DELETE 
+> - 회원 탈퇴 : DELETE 
 
 
 
-암호화의 핵심 : 반대 방향으로 복호화가 불가능해야 합니다
+- 암호 관리 [(link)](https://docs.djangoproject.com/en/3.2/topics/auth/passwords/) [(link2)](https://d2.naver.com/helloworld/318732)
 
+  - User 객체는 이전까지 DB 생성할 때처럼 `User.objects.create()` 코드를 쓰면 안됨 👈 password 암호화가 필요하기 때문
 
+  - 암호화의 핵심 : 반대 방향으로 복호화가 불가능해야함
 
-1. 회원가입 기능 구현
+  - 해시함수 : 복호화가 불가능한 단방향의 함수라는 의미
 
-2. User 모델 변경하기(11:35 ~)
+    - 단방향 해시함수도 레인보우 공격, 무차별 대입 공격 이슈 있긴함
+    - 레인보우 공격을 해결하는 것이 솔팅(Salting)
+    - 무차별 대입 공격을 해결하는 것이 키 스트레칭(Key Stretching)
+
+  - Django 는 PBKDF2 를 사용하여 password 를 저장 (메서드는 아래 코드박스 참조)
+
+    ```python
+    # User 생성
+    # 아래와 같이 입력하면 password 가 자동으로 암호화되어서 저장
+    user = User.objects.create_user('john', 'john@google.com', '1q2w3e4r!')
+    
+    # User 비밀번호 변경
+    # 마찬가지로, 비밀번호 변경할 때도 아래와 같이 .set_password() 쓰면 암호화 진행
+    user = User.objects.get(pk=2)
+    User.set_password('new password')
+    User.save()
+    
+    # User 인증(비밀번호 확인)
+    from django.contrib.auth import authenticate
+    user = authenticate(username='john', password='secret')
+    ```
+
+    
+
+- 회원가입 기능 구현 해보기
+
+1. CREATE
+
+   1-1. URL
+
+   ```python
+   # accounts/urls.py 에 아래와 같이 path 추가하기
+   
+   from django.urls import path
+   from . import views
+   
+   app_name = 'accounts'
+   urlpatterns = [
+       path('signup/', views.signup, name='signup'),
+   ]
+   ```
+
+   1-2. VIEW
+
+   ```python
+   # accounts/views.py 에 아래와 같이 signup 함수 작성
+   
+   from django.shortcuts import render
+   from django.contrib.auth.forms import UserCreationForm
+   
+   # Create your views here.
+   def signup(request):
+       form = UserCreationForm()
+       context = {
+           'form': form
+       }
+       return render(request, 'accounts/signup.html', context)
+   ```
+
+   1-3. TEMPLATE
+
+   ```django
+   <!-- accounts/templates/accounts/signup.html 생성,
+       아래와 같이 내용 채우기 -->
+   
+   {% extends 'base.html' %}
+   {% load django_bootstrap5 %}
+     
+   {% block content %}
+     <h1>회원가입</h1>
+     <form action="" method="POST">
+         {% csrf_token %}
+         {% bootstrap_form form %}
+         {% bootstrap_button button_type="submit" content="OK" %}
+     </form>
+   
+   {% endblock content %}
+   ```
+
+   
 
