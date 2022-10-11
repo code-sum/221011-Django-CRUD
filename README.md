@@ -321,12 +321,12 @@
    # accounts/forms.py 생성하고, 아래와 같이 내용 채우기
    # get_user_model()은 현재 프로젝트에서 활성화된 사용자 모델을 반환
    
-   from django.contrib.auth import get_user_model
    from django.contrib.auth.forms import UserCreationForm
+   from django.contrib.auth import get_user_model
    
    class CustomUserCreationForm(UserCreationForm):
    
-       class Meta(UserCreationForm.Meta):
+       class Meta:
            model = get_user_model()
            fields = ('username', 'password1', 'password2', 'email')
    ```
@@ -395,18 +395,66 @@
    3-1. URL
 
    ```python
+   # accounts/urls.py 에 아래와 같이 path 추가
+   # 추가된 코드 : path('<int:pk>/', views.detail, name='detail'),
    
+   from django.urls import path
+   from . import views
+   
+   app_name = 'accounts'
+   urlpatterns = [
+       path('signup/', views.signup, name='signup'),
+       path('<int:pk>/', views.detail, name='detail'),
+   ]
    ```
 
    3-2. VIEW
 
    ```python
+   # accounts/views.py 에서 detail 함수 작성
    
+   from django.shortcuts import render, redirect
+   from .forms import CustomUserCreationForm
+   from django.contrib.auth import get_user_model
+   
+   # Create your views here.
+   
+   def signup(request):
+       # POST 요청 처리
+       if request.method == 'POST':
+           form = CustomUserCreationForm(request.POST)
+           if form.is_valid():
+               form.save()
+               return redirect('articles:index')
+       else:     
+           form = CustomUserCreationForm()
+       context = {
+           'form': form
+       }
+       return render(request, 'accounts/signup.html', context)
+   
+   def detail(request, pk):
+       # user 정보 받아오기
+       user = get_user_model().objects.get(pk=pk)
+       context = {
+           'user': user
+       }
+       return render(request, 'accounts/detail.html', context)
    ```
 
    3-3. TEMPLATE
 
    ```django
+   <!-- accounts/templates/accounts/detail.html 생성,
+       아래와 같이 내용 채우기 -->
+   
+   {% extends 'base.html' %}
+   
+   {% block content %}
+     <h1>{{ user.username }}님의 프로필</h1>
+     <p>이메일:{{ user.email }}</p>
+   
+   {% endblock content %}
    ```
 
    
