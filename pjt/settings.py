@@ -47,9 +47,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'accounts',
     'django_bootstrap5',
-    'django.contrib.admin',
-    'django.contrib.auth',
+    'django.contrib.admin', # 관리자
+    'django.contrib.auth',  # 유저/인증
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
