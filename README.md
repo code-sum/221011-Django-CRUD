@@ -328,6 +328,7 @@
    
        class Meta(UserCreationForm.Meta):
            model = get_user_model()
+           fields = ('username', 'password1', 'password2', 'email')
    ```
 
    1-6. VIEW 에 CustomUserCreationForm 반영하기
@@ -361,9 +362,9 @@
    
    from django.contrib import admin
    from django.contrib.auth.admin import UserAdmin
-   from .models import User
+   from django.contrib.auth import get_user_model
    
-   admin.site.register(User, UserAdmin)
+   admin.site.register(get_user_model(), UserAdmin)
    ```
 
 
