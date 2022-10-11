@@ -360,9 +360,10 @@
    # accounts/admin.py 에 아래와 같이 내용 채우기
    
    from django.contrib import admin
+   from django.contrib.auth.admin import UserAdmin
    from .models import User
    
-   admin.site.register(User)
+   admin.site.register(User, UserAdmin)
    ```
 
 
