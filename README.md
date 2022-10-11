@@ -39,7 +39,7 @@
     - 권한 부여
     - 인증된 사용자가 수행할 수 있는 작업을 결정
     - 인증 받은 사람들 가운데 스태프와 회원처럼 서로 다른 권한을 부여 받음
-  - `create superuser` : 기본으로 내장된 기능(auth)을 활용했던 것임
+  - `createsuperuser` : 기본으로 내장된 기능(auth)을 활용했던 것임
 
 
 
@@ -113,44 +113,96 @@
 
 ## 2. User model 활용하기
 
-User Model 바탕으로 CRUD
-
-> 회원정보 생성 : CREATE
->
-> 회원정보 확인 : READ
->
-> 회원정보 프로필 : 상세보기(detail page) 
->
-> 회원정보 수정 : UPDATE
->
-> 회원정보 삭제 : DELETE 
+> 🗂️[(참고자료1)](https://docs.djangoproject.com/en/3.2/ref/contrib/auth/#user-model) [(참고자료2)](https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#substituting-a-custom-user-model)
 
 
 
-```python
-3) 사용자 관리를 본격적으로 시작하기 위해, 모델 정의
-   (근데 DB auth_user 확인해보면 이미 정의된 모델이 있음,
-   테이블의 네이밍 컨벤션도 '앱이름_모델이름')
-4) 따라서 클래스 상속받아 기존 모델을 '커스텀으로' 가져오기
-5) settings.py 에 맨 하단 # User Model 부분 새롭게 작성
-6) models.py 에 상속 관련 내용 작성
-  (이 부분은 원래 프로젝트 시작할 때 작성해야 되는거니까, 
-   이전에 작성되었던 DB 존재하면 삭제하기)
-7) 모델 만들었으니까 마이그레이션 ~ 마이그레이트
-8) 여기까지 작성하면 user model 사용할 준비 완료!
-```
+- Django User Model
+  - "Custom User Model 로 대체하기"
+  - Django 는 기본적인 인증 시스템과 여러가지 필드가 포함된 User Model 을 제공, 대부분의 개발 환경에서 기본 User Model 을 Custom User Model 로 대체
+  - Django 는 새 프로젝트를 시작하는 경우 비록 기본 User 모델이 충분하더라도 커스텀 User 모델 설정하는 것을 강력하게 권장(highly recommended)
+  - 커스텀 User 모델은 기본 User 모델과 동일하게 작동하면서도 필요한 경우 나중에 맞춤 설정할 수 있기 때문
+    - 단, User 모델 대체 작업은 프로젝트의 모든 migrations 혹은 첫 migrate 를 실행하기 전에 이 작업을 마쳐야 함
+    - 모델을 바꾼다는 것은 DB가 변경된다는 것과 동일한 말이기 때문에, 만약 Custom User Model 을 언제든지 변경할 수 있도록 미리 만들어두지 않으면 나중에 모델 하나 바꾸기 위해 DB를 복잡하게 변경해야 하는 이슈가 발생할 수 있음
 
 
 
-암호화의 핵심 : 반대 방향으로 복호화가 불가능해야 합니다
+- 모델 설정 해보기
 
+1. 모델 정의
 
+   1-1. 만약 accounts 앱을 만들고 등록하기 전에, 다른 앱을 만들면서 모델을 생성하고 마이그레이트 했다면, DB 열었을 때 `auth_user` 부분에 이미 admin 유저에 대한 정보가 입력되어 있는 것을 확인할 수 있음
+
+   - table 의 기본적인 네이밍 컨벤션 자체가 '앱이름_모델이름' 이며, 이 모델을 Django 에서 **가지고 와서 활용**하는 것이 모델 정의의 핵심 (=클래스 상속)
+
+   1-2. AUTH_USER_MODEL 정의하기
+
+   ```python
+   # pjt/settings.py 최하단에 아래와 같은 코드 추가
+   # accounts 앱에 있는 User 가 이제부터 사용할 사용자 정보라고 입력하는 것
+   
+   # User Model
+   AUTH_USER_MODEL = 'accounts.User'
+   ```
+
+   1-3. 내부에 있던 모델 상속 받아오기
+
+   - `AbstractUser` 가 무엇인지 궁금하다면? 👉 [(link)](https://github.com/django/django/blob/main/django/contrib/auth/models.py#L405)
+
+   ```python
+   # accounts/models.py 에서 아래와 같이 내용 채우기
+   
+   '''
+   아래 내용은 원래 프로젝트 시작할 때 작성해야 되는거니까, 
+   혹시 이전에 작성되었던 DB(db.sqlite3) 존재하면 삭제하기
+   migrations 풀더에 __init__.py 제외하고 번호 붙은 파일들도 삭제
+   '''
+   
+   from django.db import models
+   from django.contrib.auth.models import AbstractUser
+   
+   # Create your models here.
+   class User(AbstractUser):
+       pass
+   ```
+
+2. 모델 만들었으니까 DB에 반영하기
+
+   ```bash
+   $ python manage.py makemigrations
+   $ python manage.py migrate
+   
+   # 이제 auth_user 테이블이 아니라 accounts_user 테이블 사용시작
+   ```
+
+3. createsuperuser 명령어로 회원(관리자) 정보 하나 만들기
+
+   ```bash
+   $ python manage.py createsuperuser
+   
+   # 이후 DB 새로고침하면, accounts_user 에서 admin 정보 확인 가능
+   # 여기까지 작성하면 user model 사용할 준비 완료
+   ```
+
+   
 
 ---
 
 
 
 ## 3. 회원가입 기능 구현
+
+> 2. 에서 만든 User Model 바탕으로 CRUD 기능 구현하기
+>
+> - 회원정보 생성 : CREATE
+> - 회원정보 확인 : READ
+> - 회원정보 프로필보기 : 상세보기(READ detail page) 
+> - 회원정보 수정 : UPDATE
+> - 회원정보 삭제 : DELETE 
+
+
+
+암호화의 핵심 : 반대 방향으로 복호화가 불가능해야 합니다
 
 
 
