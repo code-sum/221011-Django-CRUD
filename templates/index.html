@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+  <div class="form col-6 col-lg-4">
+    <h1>회원가입 서비스</h1>
+    <a class="btn" href="{% url 'accounts:signup' %}">회원가입</a>
+    <a class="btn" href="{% url 'accounts:index' %}">회원목록</a>
+  </div>
+{% endblock content %}
