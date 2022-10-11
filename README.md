@@ -289,5 +289,122 @@
    {% endblock content %}
    ```
 
+   1-4. 회원가입 로직 작성 (POST 처리를 위해 views.py 를 아래와 같이 수정)
+
+   ```python
+   # accounts/views.py
+   
+   from django.shortcuts import render, redirect
+   from django.contrib.auth.forms import UserCreationForm
+   
+   # Create your views here.
+   def signup(request):
+       # POST 요청 처리
+       if request.method == 'POST':
+           form = UserCreationForm(request.POST)
+           if form.is_valid():
+               form.save()
+               return redirect('articles:index')
+       else:     
+           form = UserCreationForm()
+       context = {
+           'form': form
+       }
+       return render(request, 'accounts/signup.html', context)
+   ```
+
+   1-5. UserCreationForm() 커스텀 하기
+
+   - 기존 UserCreationForm 을 상속 받아서 User 모델 재정의
+
+   ```python
+   # accounts/forms.py 생성하고, 아래와 같이 내용 채우기
+   # get_user_model()은 현재 프로젝트에서 활성화된 사용자 모델을 반환
+   
+   from django.contrib.auth import get_user_model
+   from django.contrib.auth.forms import UserCreationForm
+   
+   class CustomUserCreationForm(UserCreationForm):
+   
+       class Meta(UserCreationForm.Meta):
+           model = get_user_model()
+   ```
+
+   1-6. VIEW 에 CustomUserCreationForm 반영하기
+
+   ```python
+   # accounts/views.py
+   
+   from django.shortcuts import render, redirect
+   from .forms import CustomUserCreationForm
+   
+   # Create your views here.
+   def signup(request):
+       # POST 요청 처리
+       if request.method == 'POST':
+           form = CustomUserCreationForm(request.POST)
+           if form.is_valid():
+               form.save()
+               return redirect('articles:index')
+       else:     
+           form = CustomUserCreationForm()
+       context = {
+           'form': form
+       }
+       return render(request, 'accounts/signup.html', context)
+   ```
+
+   1-7. admin 사이트에서 회원정보 볼 수 있게 admin.py 등록하기
+
+   ```python
+   # accounts/admin.py 에 아래와 같이 내용 채우기
+   
+   from django.contrib import admin
+   from .models import User
+   
+   admin.site.register(User)
+   ```
+
+
+
+2. READ
+
+   2-1. URL
+
+   ```python
+   
+   ```
+
+   2-2. VIEW
+
+   ```python
+   
+   ```
+
+   2-3. TEMPLATE
+
+   ```django
+   ```
+
    
 
+3. READ detail page
+
+   3-1. URL
+
+   ```python
+   
+   ```
+
+   3-2. VIEW
+
+   ```python
+   
+   ```
+
+   3-3. TEMPLATE
+
+   ```django
+   ```
+
+   
